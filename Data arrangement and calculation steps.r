@@ -57,7 +57,7 @@ G = NAM::GRM(gen,TRUE)
 rep=100
 cycles=5
 
-method=c("BayesA","BayesB","BayesC","BayesL","BRR","RKHS","LASSO","RidgeReg","ElasticNet","GBLUP","PLS","SVM")
+method=c("BayesC","BayesL","BRR","GBLUP","SVM")
 for(i in 1:rep){
   myY=read.table(paste("pheno_reference_rep_",i,".txt",sep=''),head=F)
   myY_P=matrix(NA,nrow=nrow(myY), ncol=cycles)
@@ -70,39 +70,15 @@ for(i in 1:rep){
     SVM = f22b
    
     #Bayesian
-   	BayesA = BGLR(rmExistingFiles = F,y,ETA=list(list(X=gen,model='BayesA')),verbose=F)$yHat
-   	BayesB = BGLR(rmExistingFiles = F,y,ETA=list(list(X=gen,model='BayesB')),verbose=F)$yHat
+  
   	BayesC = BGLR(rmExistingFiles = F,y,ETA=list(list(X=gen,model='BayesC')),verbose=F)$yHat
   	BayesL = BGLR(rmExistingFiles = F,y,ETA=list(list(X=gen,model='BL')),verbose=F)$yHat
     BRR = BGLR(rmExistingFiles = F,y,ETA=list(list(X=gen,model='BRR')),verbose=F)$yHat
-    RKHS = BGLR(rmExistingFiles = F,y,ETA=list(list(V=eK$vectors,d=eK$values,model='RKHS')),verbose=F)$yHat
-    
+ 
 
     # REML GBLUP
     f10 = mixed.solve(y,K=G)
     GBLUP = c(f10$u[w])
-    # 
-    cv1 = glmnet::cv.glmnet(x=gen[-w,],y=y[-w],alpha=1); 
-    lmb1 = cv1$lambda.min;
-    f4 = glmnet::glmnet(x=gen[-w,],y=y[-w],lambda = lmb1,alpha = 1)
-    LASSO = c(glmnet::predict.glmnet(f4,gen[w,]))
-
-    cv2 = glmnet::cv.glmnet(x=gen[-w,],y=y[-w],alpha=0);
-    lmb2 = cv2$lambda.min; 
-    f5 = glmnet::glmnet(x=gen[-w,],y=y[-w],lambda = lmb2,alpha = 0)
-    RidgeReg = c(glmnet::predict.glmnet(f5,gen[w,]))
-
-
-    cv3 = glmnet::cv.glmnet(x=gen[-w,],y=y[-w],alpha=0.01);
-    lmb3 = cv3$lambda.min; 
-    f14 = glmnet::glmnet(x=gen[-w,],y=y[-w],lambda = lmb3,alpha = 0.01)
-    ElasticNet = c(glmnet::predict.glmnet(f14,gen[w,]))
-    
-    # PLS
-    ncomp = 5
-    f16a = plsr(y[-w]~gen[-w,],ncomp=ncomp,validation='none')
-    PLS = predict(f16a,gen[w,])[,1,ncomp]
-
 
     
     for(j in 1:length(method)){
