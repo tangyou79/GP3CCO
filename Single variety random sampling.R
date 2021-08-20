@@ -90,7 +90,7 @@ G = exp(-(E2/mean(E2)))
 eK = eigen(G,symmetric=T)
 G = NAM::GRM(gen,TRUE)
 
-method=c("BRR")
+method=c("GBLUP")
 
 for(i in repA:repB){
   myY=read.table(paste("data/RCCLpheno_reference_rep_",i,".txt",sep=''),head=F)
@@ -100,16 +100,16 @@ for(i in repA:repB){
     y=as.numeric(myY[,r])
     w=which(is.na(y))
   
-   # BRR = BGLR(rmExistingFiles = F,y,ETA=list(list(X=W, model="FIXED"),list(X=gen,model='BRR')),verbose=F)$yHat
-    BRR=BGLR( y=y,ETA=list(list(X=W, model="FIXED"),G=list(K=G,model='RKHS')))$yHat
+   # GBLUP = BGLR(rmExistingFiles = F,y,ETA=list(list(X=W, model="FIXED"),list(X=gen,model='GBLUP')),verbose=F)$yHat
+    GBLUP=BGLR( y=y,ETA=list(list(X=W, model="FIXED"),G=list(K=G,model='RKHS')))$yHat
 
-    BRRr = BRR
-    BRR = BRR[w]
+    GBLUPr = GBLUP
+    GBLUP = GBLUP[w]
   
   for(j in 1:length(method)){
      
      
-      myY_Pr[,r]= BRRr
+      myY_Pr[,r]= GBLUPr
       write.table(myY_Pr,paste("data/RCCL",method[j],"_ALL_pheno_prediction_rep_",i,".txt",sep=''),quote=F,row.names=F,col.names = F)
     
       myGS=eval(as.symbol(method[j]), envir=.GlobalEnv)
